@@ -3,7 +3,7 @@ name: ECS deploy
 on:
   push:
     branches:
-      - test
+      - main
 
 jobs:
   build-and-deploy:
@@ -35,7 +35,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.ECR_REPOSITORY }}:latest
+          tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
 
       # Download the current ECS task definition
       - name: Download task definition
