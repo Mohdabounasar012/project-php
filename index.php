@@ -37,10 +37,10 @@
       </thead>
       <tbody>
         <?php
-        # Include connection
+        // Include connection
         require_once "./config.php";
 
-        # Attempt select query execution
+        // Attempt select query execution
         $sql = "SELECT * FROM employees";
 
         if ($result = mysqli_query($link, $sql)) {
@@ -50,13 +50,13 @@
             foreach ($rows as $row) { ?>
               <tr>
                 <td><?= $count++; ?></td>
-                <td><?= $row["first_name"]; ?></td>
-                <td><?= $row["last_name"]; ?></td>
-                <td><?= $row["email"]; ?></td>
-                <td><?= $row["age"]; ?></td>
-                <td><?= $row["gender"]; ?></td>
-                <td><?= $row["designation"]; ?></td>
-                <td><?= $row["joining_date"]; ?></td>
+                <td><?= htmlspecialchars($row["first_name"]); ?></td>
+                <td><?= htmlspecialchars($row["last_name"]); ?></td>
+                <td><?= htmlspecialchars($row["email"]); ?></td>
+                <td><?= htmlspecialchars($row["age"]); ?></td>
+                <td><?= htmlspecialchars($row["gender"]); ?></td>
+                <td><?= htmlspecialchars($row["role"]); ?></td> <!-- Corrected 'designation' to 'role' -->
+                <td><?= htmlspecialchars($row["joining_date"]); ?></td>
                 <td>
                   <a href="./update.php?id=<?= $row["id"]; ?>" class="btn btn-primary btn-sm">
                     <i class="bi bi-pencil-square"></i>
@@ -68,7 +68,7 @@
               </tr>
             <?php
             }
-            # Free result set
+            // Free result set
             mysqli_free_result($result);
           } else { ?>
             <tr>
@@ -76,8 +76,12 @@
             </tr>
         <?php
           }
+        } else {
+          // Error message if query fails
+          echo "<tr><td colspan='9' class='text-center text-danger'>Error fetching records: " . mysqli_error($link) . "</td></tr>";
         }
-        # Close connection
+
+        // Close connection
         mysqli_close($link);
         ?>
       </tbody>
