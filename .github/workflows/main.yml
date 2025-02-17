@@ -1,0 +1,66 @@
+name: ECS deploy
+
+on:
+  push:
+    branches:
+      - test
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up AWS credentials
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Log in to Amazon ECR 
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry: ${{ secrets.ECR_REGISTRY }}
+
+      # Build and push Docker image to ECR
+      - name: Build and push Docker image to ECR
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.ECR_REPOSITORY }}:latest
+
+      # Download the current ECS task definition
+      - name: Download task definition
+        id: download-task
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ secrets.TASK_DEFINITION_NAME }} \
+            --query taskDefinition \
+            --output json > task-definition.json
+          echo "task-definition=task-definition.json" >> $GITHUB_OUTPUT
+
+      # Update the task definition with the new Docker image
+      - name: Update task definition
+        id: update-task
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ secrets.CONTAINER_NAME }}  
+          image: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
+
+      # Deploy the updated task definition to ECS
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.update-task.outputs.task-definition }}
+          service: ${{ secrets.ECS_SERVICE }}  
+          cluster: ${{ secrets.ECS_CLUSTER }}  
+          wait-for-service-stability: true
