@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  php-apache:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./PHP-MySQL-CRUD-Operations:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Abounasar
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data:
