@@ -5,7 +5,7 @@ FROM php:8.1-apache
 RUN docker-php-ext-install mysqli
 
 # Set the ServerName directive
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+RUN echo "ServerName database-1.ch2wm0wuekno.ap-northeast-1.rds.amazonaws.com" >> /etc/apache2/apache2.conf
 
 
 # Copy application files to the container
