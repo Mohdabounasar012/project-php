@@ -37,51 +37,37 @@
       </thead>
       <tbody>
         <?php
-        // Include connection
+        // Open connection
         require_once "./config.php";
 
-        // Attempt select query execution
+        // Query to select employees
         $sql = "SELECT * FROM employees";
-
         if ($result = mysqli_query($link, $sql)) {
-          if (mysqli_num_rows($result) > 0) {
-            $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-            $count = 1;
-            foreach ($rows as $row) { ?>
-              <tr>
-                <td><?= $count++; ?></td>
-                <td><?= htmlspecialchars($row["first_name"]); ?></td>
-                <td><?= htmlspecialchars($row["last_name"]); ?></td>
-                <td><?= htmlspecialchars($row["email"]); ?></td>
-                <td><?= htmlspecialchars($row["age"]); ?></td>
-                <td><?= htmlspecialchars($row["gender"]); ?></td>
-                <td><?= htmlspecialchars($row["role"]); ?></td> <!-- Corrected 'designation' to 'role' -->
-                <td><?= htmlspecialchars($row["joining_date"]); ?></td>
-                <td>
-                  <a href="./update.php?id=<?= $row["id"]; ?>" class="btn btn-primary btn-sm">
-                    <i class="bi bi-pencil-square"></i>
-                  </a>&nbsp;
-                  <a href="./delete.php?id=<?= $row["id"]; ?>" class="btn btn-danger btn-sm">
-                    <i class="bi bi-trash-fill"></i>
-                  </a>
-                </td>
-              </tr>
-            <?php
+            if (mysqli_num_rows($result) > 0) {
+                $count = 1;
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo "<tr>";
+                    echo "<td>" . $count++ . "</td>";
+                    echo "<td>" . htmlspecialchars($row['first_name']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['last_name']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['age']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['gender']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['role']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['joining_date']) . "</td>";
+                    echo "<td><a href='edit.php?id=" . $row['id'] . "' class='btn btn-warning btn-sm'>Edit</a> 
+                            <a href='delete.php?id=" . $row['id'] . "' class='btn btn-danger btn-sm'>Delete</a></td>";
+                    echo "</tr>";
+                }
+                mysqli_free_result($result);
+            } else {
+                echo "<tr><td colspan='9'>No records found.</td></tr>";
             }
-            // Free result set
-            mysqli_free_result($result);
-          } else { ?>
-            <tr>
-              <td class="text-center text-danger fw-bold" colspan="9">** No records were found **</td>
-            </tr>
-        <?php
-          }
         } else {
-          // Error message if query fails
-          echo "<tr><td colspan='9' class='text-center text-danger'>Error fetching records: " . mysqli_error($link) . "</td></tr>";
+            echo "<tr><td colspan='9'>Error fetching records: " . mysqli_error($link) . "</td></tr>";
         }
 
-        // Close connection
+        // Close the connection after everything is done
         mysqli_close($link);
         ?>
       </tbody>
